@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  
+  <!-- SEO Meta Tags -->
+  <title>Vulnerability Report Builder - Free Security Report Generator Tool</title>
+  <meta name="description" content="Create professional vulnerability reports with CVSS v3.1 scoring, PDF export, and security templates. Free online tool for penetration testers, bug bounty hunters, and security researchers. No installation required.">
+  <meta name="keywords" content="vulnerability report, security report generator, CVSS calculator, penetration testing, bug bounty, security assessment, vulnerability documentation, ethical hacking, security audit tool">
+  <meta name="author" content="Vulnerability Report Builder">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Vulnerability Report Builder - Free Security Report Generator">
+  <meta property="og:description" content="Create professional vulnerability reports with CVSS scoring, templates, and PDF export. Perfect for penetration testers and bug bounty hunters.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://yourwebsite.com">
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vulnerability Report Builder - Free Security Tool">
+  <meta name="twitter:description" content="Professional vulnerability reporting tool with CVSS v3.1, templates, and PDF export.">
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://yourwebsite.com">
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#0f62fe">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&family=Work+Sans:wght@300;400;500;600;700&family=Nunito:wght@300;400;600;700&family=PT+Sans:wght@400;700&family=Merriweather:wght@300;400;700&family=Lora:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&family=Roboto+Slab:wght@300;400;500;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN (for convenience) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config: remove border radius globally via utilities if desired
+    tailwind.config = {
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+
+  <!-- IBM Carbon CSS (CSS only) -->
+  <link rel="stylesheet" href="https://unpkg.com/carbon-components/css/carbon-components.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Vulnerability Report Builder",
+    "description": "Free online tool for creating professional security vulnerability reports with CVSS scoring and PDF export",
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "featureList": [
+      "CVSS v3.1 Calculator",
+      "PDF Report Generation",
+      "Security Templates",
+      "Screenshot Management",
+      "Markdown Export"
+    ]
+  }
+  </script>
+  <!-- Libraries (marked, DOMPurify, html2pdf, html2canvas) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+</head>
+<body class="font-sans">
+  <!-- Header (aligned with form) -->
+  <header class="app-header pt-6 pb-4" role="banner">
+    <div class="max-w-5xl mx-auto px-4">
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-700 border border-indigo-800 shadow-md px-6 py-4 rounded-lg">
+        <div class="flex items-center gap-3">
+          <div class="bg-white/10 backdrop-blur-sm p-2.5 rounded-lg">
+            <i class="bi bi-shield-lock text-white text-2xl" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Vulnerability Report Builder</h1>
+            <p class="text-blue-100 text-sm">Free Security Report Generator - Create Professional Penetration Testing Reports with CVSS Scoring</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Floating Dock -->
+  <aside id="floatingDock" class="fixed right-8 top-1/2 transform -translate-y-1/2 bg-white border shadow-lg p-2 flex flex-col gap-2 z-50" role="navigation" aria-label="Quick actions toolbar">
+    <button id="btnNew" title="New Report" class="dock-btn" aria-label="Create new report"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i></button>
+    <div class="dock-btn-group">
+      <button id="btnLoadOptions" title="Load Options" class="dock-btn" aria-label="Load options menu"><i class="bi bi-folder2-open" aria-hidden="true"></i></button>
+      <div class="dock-dropdown" id="loadDropdown" role="menu">
+        <button id="btnLoadSample" class="dock-dropdown-item" role="menuitem"><i class="bi bi-file-text" aria-hidden="true"></i> Sample Report</button>
+        <button id="btnTemplates" class="dock-dropdown-item" role="menuitem"><i class="bi bi-layout-text-sidebar" aria-hidden="true"></i> Templates</button>
+      </div>
+    </div>
+    <div class="border-t"></div>
+    <button id="btnSaveDraft" title="Save Draft" class="dock-btn" aria-label="Save current draft"><i class="bi bi-save" aria-hidden="true"></i></button>
+    <div class="dock-btn-group">
+      <button id="btnExportOptions" title="Export Options" class="dock-btn" aria-label="Export options menu"><i class="bi bi-box-arrow-up" aria-hidden="true"></i></button>
+      <div class="dock-dropdown" id="exportDropdown" role="menu">
+        <button id="btnPreviewPDF" class="dock-dropdown-item" role="menuitem"><i class="bi bi-eye" aria-hidden="true"></i> Preview PDF</button>
+        <button id="btnDownloadPDF" class="dock-dropdown-item" role="menuitem"><i class="bi bi-download" aria-hidden="true"></i> Download PDF</button>
+        <button id="btnExportMarkdown" class="dock-dropdown-item" role="menuitem"><i class="bi bi-filetype-md" aria-hidden="true"></i> Export Markdown</button>
+      </div>
+    </div>
+    <div class="border-t"></div>
+    <button id="btnSettings" title="Settings" class="dock-btn" aria-label="Open settings"><i class="bi bi-gear" aria-hidden="true"></i></button>
+    <button id="btnDrafts" title="Drafts Manager" class="dock-btn" aria-label="Manage drafts"><i class="bi bi-collection" aria-hidden="true"></i></button>
+    <button id="btnDocs" title="Documentation" class="dock-btn" aria-label="View documentation"><i class="bi bi-book" aria-hidden="true"></i></button>
+    <div class="border-t"></div>
+    <button id="btnTheme" title="Toggle Dark Mode" class="dock-btn" aria-label="Toggle dark mode"><i class="bi bi-moon-fill" aria-hidden="true"></i></button>
+  </aside>
+
+  <main class="max-w-5xl mx-auto px-4 pb-12" role="main">
+    <div id="mainGrid" class="grid grid-cols-1 gap-6">
+      <!-- Report Builder Form -->
+      <section class="bg-white border-2 border-blue-600 p-4 shadow-sm" id="formColumn" aria-label="Vulnerability report form">
+        <!-- Completeness Indicator -->
+        <div class="mb-4 pb-3 border-b">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-medium">Report Completeness</div>
+            <div id="completenessPercent" class="text-sm font-medium">0%</div>
+          </div>
+          <div class="w-full bg-gray-200 h-2" style="border: 1px solid var(--border-color);">
+            <div id="completenessBar" class="h-full transition-all duration-300" style="width: 0%; background-color: var(--carbon-blue);"></div>
+          </div>
+          <div id="completenessDetails" class="text-xs text-gray-500 mt-1"></div>
+        </div>
+        
+        <form id="reportForm" class="space-y-4">
+          <section class="border-b pb-3 collapsible-section">
+            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="reporter">
+              <span>Reporter Profile</span>
+              <i class="bi bi-chevron-down"></i>
+            </h2>
+            <div class="section-content mt-3">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label class="block">
+                  <div class="text-xs text-gray-600">Name</div>
+                  <input type="text" id="rep_name" class="input-field" />
+                </label>
+                <label class="block">
+                  <div class="text-xs text-gray-600">Email</div>
+                  <input type="email" id="rep_email" class="input-field" />
+                </label>
+                <label class="block">
+                  <div class="text-xs text-gray-600">Handle</div>
+                  <input type="text" id="rep_handle" class="input-field" />
+                </label>
+                <label class="block">
+                  <div class="text-xs text-gray-600">PGP Key (optional)</div>
+                  <input type="text" id="rep_pgp" class="input-field" />
+                </label>
+                <label class="block md:col-span-2">
+                  <div class="text-xs text-gray-600">Disclosure Preference</div>
+                  <select id="rep_disclosure" class="input-field">
+                    <option value="Responsible">Responsible</option>
+                    <option value="Coordinated">Coordinated</option>
+                    <option value="Public">Public</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="border-b pb-3 collapsible-section">
+            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="vulnerability">
+              <span>Vulnerability Details</span>
+              <i class="bi bi-chevron-down"></i>
+            </h2>
+            <div class="section-content mt-3">
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Title <span class="text-red-600">*</span></div>
+              <input type="text" id="vuln_title" class="input-field" required />
+              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+            </label>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+              <label>
+                <div class="text-xs text-gray-600">VRT Category</div>
+                <select id="vuln_category" class="input-field">
+                  <option value="">Select Category...</option>
+                  <optgroup label="Injection">
+                    <option value="sql-injection">SQL Injection</option>
+                    <option value="code-injection">Code Injection</option>
+                    <option value="command-injection">Command Injection</option>
+                    <option value="ldap-injection">LDAP Injection</option>
+                    <option value="xpath-injection">XPath Injection</option>
+                    <option value="xml-injection">XML Injection</option>
+                    <option value="ssi-injection">SSI Injection</option>
+                  </optgroup>
+                  <optgroup label="Cross-Site Scripting (XSS)">
+                    <option value="xss-reflected">Reflected XSS</option>
+                    <option value="xss-stored">Stored XSS</option>
+                    <option value="xss-dom">DOM-based XSS</option>
+                    <option value="xss-self">Self XSS</option>
+                  </optgroup>
+                  <optgroup label="Authentication & Authorization">
+                    <option value="auth-bypass">Authentication Bypass</option>
+                    <option value="broken-auth">Broken Authentication</option>
+                    <option value="session-fixation">Session Fixation</option>
+                    <option value="privilege-escalation">Privilege Escalation</option>
+                    <option value="idor">Insecure Direct Object Reference (IDOR)</option>
+                    <option value="missing-auth">Missing Authorization</option>
+                  </optgroup>
+                  <optgroup label="CSRF & Request Forgery">
+                    <option value="csrf">Cross-Site Request Forgery (CSRF)</option>
+                    <option value="ssrf">Server-Side Request Forgery (SSRF)</option>
+                  </optgroup>
+                  <optgroup label="Information Disclosure">
+                    <option value="info-sensitive">Sensitive Data Exposure</option>
+                    <option value="info-directory">Directory Listing</option>
+                    <option value="info-error">Verbose Error Messages</option>
+                    <option value="info-backup">Backup File Disclosure</option>
+                    <option value="info-config">Configuration Exposure</option>
+                  </optgroup>
+                  <optgroup label="Cryptographic Issues">
+                    <option value="crypto-weak">Weak Cryptography</option>
+                    <option value="crypto-ssl">Insecure SSL/TLS</option>
+                    <option value="crypto-random">Weak Random Number Generation</option>
+                    <option value="crypto-hashing">Insecure Password Hashing</option>
+                  </optgroup>
+                  <optgroup label="Business Logic">
+                    <option value="logic-race">Race Condition</option>
+                    <option value="logic-bypass">Business Logic Bypass</option>
+                    <option value="logic-workflow">Workflow Violation</option>
+                  </optgroup>
+                  <optgroup label="File Handling">
+                    <option value="file-upload">Unrestricted File Upload</option>
+                    <option value="file-inclusion">Local/Remote File Inclusion</option>
+                    <option value="file-traversal">Path Traversal</option>
+                    <option value="file-download">Arbitrary File Download</option>
+                  </optgroup>
+                  <optgroup label="Security Misconfiguration">
+                    <option value="config-default">Default Credentials</option>
+                    <option value="config-cors">Misconfigured CORS</option>
+                    <option value="config-headers">Missing Security Headers</option>
+                    <option value="config-debug">Debug Mode Enabled</option>
+                  </optgroup>
+                  <optgroup label="Denial of Service">
+                    <option value="dos-application">Application DoS</option>
+                    <option value="dos-regex">Regular Expression DoS (ReDoS)</option>
+                    <option value="dos-resource">Resource Exhaustion</option>
+                  </optgroup>
+                  <optgroup label="API & Web Services">
+                    <option value="api-auth">API Authentication Bypass</option>
+                    <option value="api-rate">Missing Rate Limiting</option>
+                    <option value="api-mass">Mass Assignment</option>
+                    <option value="api-excessive">Excessive Data Exposure</option>
+                  </optgroup>
+                  <optgroup label="Mobile">
+                    <option value="mobile-insecure-storage">Insecure Data Storage</option>
+                    <option value="mobile-hardcoded">Hardcoded Secrets</option>
+                    <option value="mobile-ssl">SSL Pinning Bypass</option>
+                  </optgroup>
+                  <optgroup label="Other">
+                    <option value="clickjacking">Clickjacking</option>
+                    <option value="open-redirect">Open Redirect</option>
+                    <option value="xxe">XML External Entity (XXE)</option>
+                    <option value="deserialization">Insecure Deserialization</option>
+                    <option value="other">Other/Uncategorized</option>
+                  </optgroup>
+                </select>
+              </label>
+
+              <label>
+                <div class="text-xs text-gray-600">Severity</div>
+                <select id="vuln_severity" class="input-field">
+                  <option>Informational</option>
+                  <option>Low</option>
+                  <option>Medium</option>
+                  <option>High</option>
+                  <option>Critical</option>
+                </select>
+              </label>
+            </div>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">OWASP Top 10 2025</div>
+              <select id="vuln_owasp" class="input-field">
+                <option value="">Select OWASP Category...</option>
+                <option value="A01:2025">A01:2025 - Broken Access Control</option>
+                <option value="A02:2025">A02:2025 - Cryptographic Failures</option>
+                <option value="A03:2025">A03:2025 - Injection</option>
+                <option value="A04:2025">A04:2025 - Insecure Design</option>
+                <option value="A05:2025">A05:2025 - Security Misconfiguration</option>
+                <option value="A06:2025">A06:2025 - Vulnerable and Outdated Components</option>
+                <option value="A07:2025">A07:2025 - Identification and Authentication Failures</option>
+                <option value="A08:2025">A08:2025 - Software and Data Integrity Failures</option>
+                <option value="A09:2025">A09:2025 - Security Logging and Monitoring Failures</option>
+                <option value="A10:2025">A10:2025 - Server-Side Request Forgery (SSRF)</option>
+              </select>
+            </label>
+
+            <!-- CVSS Calculator -->
+            <div class="mt-3">
+              <div class="flex items-center justify-between mb-1">
+                <div class="text-xs text-gray-600">CVSS v3.1 Calculator</div>
+                <button type="button" id="btnResetCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0">Reset</button>
+              </div>
+              
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <!-- Attack Vector -->
+                <label>
+                  <div class="text-xs text-gray-600">Attack Vector (AV)</div>
+                  <select id="cvss_av" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">Network (N)</option>
+                    <option value="A">Adjacent (A)</option>
+                    <option value="L">Local (L)</option>
+                    <option value="P">Physical (P)</option>
+                  </select>
+                </label>
+
+                <!-- Attack Complexity -->
+                <label>
+                  <div class="text-xs text-gray-600">Attack Complexity (AC)</div>
+                  <select id="cvss_ac" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="L">Low (L)</option>
+                    <option value="H">High (H)</option>
+                  </select>
+                </label>
+
+                <!-- Privileges Required -->
+                <label>
+                  <div class="text-xs text-gray-600">Privileges Required (PR)</div>
+                  <select id="cvss_pr" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">None (N)</option>
+                    <option value="L">Low (L)</option>
+                    <option value="H">High (H)</option>
+                  </select>
+                </label>
+
+                <!-- User Interaction -->
+                <label>
+                  <div class="text-xs text-gray-600">User Interaction (UI)</div>
+                  <select id="cvss_ui" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">None (N)</option>
+                    <option value="R">Required (R)</option>
+                  </select>
+                </label>
+
+                <!-- Scope -->
+                <label>
+                  <div class="text-xs text-gray-600">Scope (S)</div>
+                  <select id="cvss_s" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="U">Unchanged (U)</option>
+                    <option value="C">Changed (C)</option>
+                  </select>
+                </label>
+
+                <!-- Confidentiality -->
+                <label>
+                  <div class="text-xs text-gray-600">Confidentiality (C)</div>
+                  <select id="cvss_c" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">None (N)</option>
+                    <option value="L">Low (L)</option>
+                    <option value="H">High (H)</option>
+                  </select>
+                </label>
+
+                <!-- Integrity -->
+                <label>
+                  <div class="text-xs text-gray-600">Integrity (I)</div>
+                  <select id="cvss_i" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">None (N)</option>
+                    <option value="L">Low (L)</option>
+                    <option value="H">High (H)</option>
+                  </select>
+                </label>
+
+                <!-- Availability -->
+                <label>
+                  <div class="text-xs text-gray-600">Availability (A)</div>
+                  <select id="cvss_a" class="input-field text-sm">
+                    <option value="">-</option>
+                    <option value="N">None (N)</option>
+                    <option value="L">Low (L)</option>
+                    <option value="H">High (H)</option>
+                  </select>
+                </label>
+              </div>
+
+              <!-- CVSS Results -->
+              <div class="mt-2 p-2 border" style="background: var(--bg-tertiary); border-color: var(--border-color)">
+                <div class="mb-2">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="text-xs text-gray-600">CVSS Vector String</div>
+                    <button type="button" id="btnCopyCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0" title="Copy to clipboard">
+                      <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                  </div>
+                  <input type="text" id="cvss_vector" class="input-field font-mono text-sm" placeholder="Paste or generate CVSS vector" style="color: var(--text-primary)" />
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <div class="text-xs text-gray-600">Base Score</div>
+                    <div id="cvss_score" class="text-2xl font-bold" style="color: var(--text-primary)">-</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="text-xs text-gray-600">Severity</div>
+                    <div id="cvss_severity" class="text-xs font-bold">-</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Summary (Markdown) <span class="text-red-600">*</span></div>
+              <textarea id="vuln_summary" rows="4" class="input-field monospace"></textarea>
+              <div class="text-xs text-gray-500 mt-1" id="counter_summary"></div>
+              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+            </label>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Steps to Reproduce (Markdown) <span class="text-red-600">*</span></div>
+              <textarea id="vuln_steps" rows="6" class="input-field monospace"></textarea>
+              <div class="text-xs text-gray-500 mt-1" id="counter_steps"></div>
+              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+            </label>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Observables / Evidence (one per line)</div>
+              <textarea id="vuln_observables" rows="3" class="input-field monospace"></textarea>
+            </label>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Impact <span class="text-red-600">*</span></div>
+              <textarea id="vuln_impact" rows="3" class="input-field monospace"></textarea>
+              <div class="text-xs text-gray-500 mt-1" id="counter_impact"></div>
+              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+            </label>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Mitigation / Recommendations</div>
+              <textarea id="vuln_mitigation" rows="3" class="input-field monospace"></textarea>
+              <div class="text-xs text-gray-500 mt-1" id="counter_mitigation"></div>
+            </label>
+
+            <label class="block mt-3">
+              <div class="text-xs text-gray-600">Notes for Triage Team</div>
+              <textarea id="vuln_notes" rows="2" class="input-field monospace"></textarea>
+            </label>
+            </div>
+          </section>
+
+          <section class="border-b pb-3 collapsible-section">
+            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="screenshots">
+              <span>Screenshots & Evidence</span>
+              <i class="bi bi-chevron-down"></i>
+            </h2>
+            <div class="section-content mt-3">
+              <div id="dropArea" class="border-dashed border-2 p-4 text-center text-sm text-gray-600">Drag & drop images here, or <label for="fileInput" class="text-blue-600 cursor-pointer">choose files</label>
+                <input id="fileInput" type="file" accept="image/png,image/jpeg" multiple hidden />
+              </div>
+              <div id="thumbs" class="mt-3 grid grid-cols-3 gap-2"></div>
+            </div>
+          </section>
+
+          <div id="autosaveIndicator" class="text-xs text-gray-600 mt-1 hidden">Autosaved just now</div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- Settings modal (hidden by default) -->
+  <div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+    <div class="modal-content p-4 w-full max-w-2xl border m-4 max-h-screen overflow-y-auto">
+      <h3 class="text-lg font-medium modal-title">Settings & Export Options</h3>
+      <div class="mt-3 space-y-3">
+        <label class="block">
+          <div class="text-sm text-gray-700">PDF Font Family:</div>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="setting_pdfFont" 
+              class="input-field" 
+              placeholder="Search Google Fonts (e.g., Inter, Roboto, Playfair Display...)"
+              autocomplete="off"
+            />
+            <div id="fontSearchResults" class="hidden absolute w-full border mt-1 max-h-60 overflow-y-auto z-10" style="background: var(--bg-secondary); border-color: var(--border-color);"></div>
+          </div>
+          <div class="text-xs mt-1" style="color: var(--text-secondary);">
+            <span id="currentFont">Current: Inter</span> • 
+            <a href="https://fonts.google.com/" target="_blank" class="text-blue-600 hover:underline">Browse Google Fonts</a>
+          </div>
+        </label>
+        <label class="block">
+          <div class="text-sm text-gray-700">Page Size:</div>
+          <select id="setting_pageSize" class="input-field">
+            <option value="a4">A4</option>
+            <option value="letter">Letter</option>
+          </select>
+        </label>
+        <label class="block">
+          <div class="text-sm text-gray-700">Header Text:</div>
+          <input id="setting_headerText" class="input-field" placeholder="Optional header text for PDF" />
+        </label>
+        <label class="block">
+          <div class="text-sm text-gray-700">Footer Text:</div>
+          <input id="setting_footerText" class="input-field" placeholder="Optional footer text for PDF" />
+        </label>
+        <label class="block">
+          <div class="text-sm text-gray-700">Header Image (optional):</div>
+          <label class="file-input-label">
+            <i class="bi bi-image"></i> Choose Header Image
+            <input type="file" id="setting_headerImage" accept="image/png,image/jpeg" class="file-input" />
+          </label>
+          <div id="headerImagePreview" class="mt-2"></div>
+        </label>
+        <label class="block">
+          <div class="text-sm text-gray-700">Footer Image (optional):</div>
+          <label class="file-input-label">
+            <i class="bi bi-image"></i> Choose Footer Image
+            <input type="file" id="setting_footerImage" accept="image/png,image/jpeg" class="file-input" />
+          </label>
+          <div id="footerImagePreview" class="mt-2"></div>
+        </label>
+        <label class="flex items-center gap-2">
+          <input type="checkbox" id="setting_includeReporter" checked />
+          <span class="text-sm">Include reporter details in PDF</span>
+        </label>
+        <div class="flex gap-2 mt-3 flex-wrap">
+          <button id="btnSaveSettings" class="btn-primary"><i class="bi bi-check-circle"></i> Save Settings</button>
+          <button id="btnClearData" class="btn-danger"><i class="bi bi-trash"></i> Clear All Data</button>
+          <button id="btnCloseSettings" class="btn-ghost"><i class="bi bi-x-circle"></i> Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drafts modal -->
+  <div id="draftsModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+    <div class="modal-content p-4 w-full max-w-xl border m-4 max-h-screen overflow-y-auto">
+      <h3 class="text-lg font-medium modal-title">Load Draft</h3>
+      <div id="draftsList" class="mt-3 space-y-2"></div>
+      <div class="mt-3">
+        <button id="btnCloseDrafts" class="btn-ghost"><i class="bi bi-x-circle"></i> Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Modal for alerts/confirms/prompts -->
+  <div id="customModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+    <div class="modal-content p-4 w-full max-w-md border m-4">
+      <h3 id="customModalTitle" class="text-lg font-medium modal-title mb-3"></h3>
+      <div id="customModalBody" class="text-sm mb-4"></div>
+      <input id="customModalInput" type="text" class="input-field mb-3 hidden" />
+      <div id="customModalButtons" class="flex gap-2 justify-end"></div>
+    </div>
+  </div>
+
+  <!-- Templates modal -->
+  <div id="templatesModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+    <div class="modal-content p-4 w-full max-w-2xl border m-4 max-h-screen overflow-y-auto">
+      <h3 class="text-lg font-medium modal-title">Select Vulnerability Template</h3>
+      <p class="text-xs text-gray-600 mt-1">Choose a pre-filled template to get started quickly</p>
+      <div id="templatesList" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      <div class="mt-4 flex gap-2 justify-end">
+        <button id="btnCloseTemplates" class="btn-ghost"><i class="bi bi-x-circle"></i> Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documentation Modal -->
+  <div id="docsModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+    <div class="modal-content p-4 w-full max-w-4xl border m-4 max-h-screen overflow-y-auto">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-xl font-medium modal-title"><i class="bi bi-book"></i> Documentation</h3>
+        <button id="btnCloseDocs" class="btn-ghost"><i class="bi bi-x-circle"></i></button>
+      </div>
+      
+      <div class="flex gap-2 mb-4 border-b pb-2">
+        <button id="btnDocReadme" class="doc-tab-btn active px-4 py-2 text-sm font-medium">
+          <i class="bi bi-file-text"></i> Overview
+        </button>
+        <button id="btnDocFeatures" class="doc-tab-btn px-4 py-2 text-sm font-medium">
+          <i class="bi bi-stars"></i> Features
+        </button>
+      </div>
+      
+      <div id="docContent" class="prose prose-sm max-w-none" style="color: var(--text-primary)">
+        <p class="text-center" style="color: var(--text-secondary)">Loading documentation...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/storage.js"></script>
+  <script src="js/sample-data.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

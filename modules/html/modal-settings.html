@@ -1,0 +1,65 @@
+<!-- Settings modal (hidden by default) -->
+<div id="settingsModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+  <div class="modal-content p-4 w-full max-w-2xl border m-4 max-h-screen overflow-y-auto">
+    <h3 class="text-lg font-medium modal-title">Settings & Export Options</h3>
+    <div class="mt-3 space-y-3">
+      <label class="block">
+        <div class="text-sm text-gray-700">PDF Font Family:</div>
+        <div class="relative">
+          <input 
+            type="text" 
+            id="setting_pdfFont" 
+            class="input-field" 
+            placeholder="Search Google Fonts (e.g., Inter, Roboto, Playfair Display...)"
+            autocomplete="off"
+          />
+          <div id="fontSearchResults" class="hidden absolute w-full border mt-1 max-h-60 overflow-y-auto z-10" style="background: var(--bg-secondary); border-color: var(--border-color);"></div>
+        </div>
+        <div class="text-xs mt-1" style="color: var(--text-secondary);">
+          <span id="currentFont">Current: Inter</span> • 
+          <a href="https://fonts.google.com/" target="_blank" class="text-blue-600 hover:underline">Browse Google Fonts</a>
+        </div>
+      </label>
+      <label class="block">
+        <div class="text-sm text-gray-700">Page Size:</div>
+        <select id="setting_pageSize" class="input-field">
+          <option value="a4">A4</option>
+          <option value="letter">Letter</option>
+        </select>
+      </label>
+      <label class="block">
+        <div class="text-sm text-gray-700">Header Text:</div>
+        <input id="setting_headerText" class="input-field" placeholder="Optional header text for PDF" />
+      </label>
+      <label class="block">
+        <div class="text-sm text-gray-700">Footer Text:</div>
+        <input id="setting_footerText" class="input-field" placeholder="Optional footer text for PDF" />
+      </label>
+      <label class="block">
+        <div class="text-sm text-gray-700">Header Image (optional):</div>
+        <label class="file-input-label">
+          <i class="bi bi-image"></i> Choose Header Image
+          <input type="file" id="setting_headerImage" accept="image/png,image/jpeg" class="file-input" />
+        </label>
+        <div id="headerImagePreview" class="mt-2"></div>
+      </label>
+      <label class="block">
+        <div class="text-sm text-gray-700">Footer Image (optional):</div>
+        <label class="file-input-label">
+          <i class="bi bi-image"></i> Choose Footer Image
+          <input type="file" id="setting_footerImage" accept="image/png,image/jpeg" class="file-input" />
+        </label>
+        <div id="footerImagePreview" class="mt-2"></div>
+      </label>
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="setting_includeReporter" checked />
+        <span class="text-sm">Include reporter details in PDF</span>
+      </label>
+      <div class="flex gap-2 mt-3 flex-wrap">
+        <button id="btnSaveSettings" class="btn-primary"><i class="bi bi-check-circle"></i> Save Settings</button>
+        <button id="btnClearData" class="btn-danger"><i class="bi bi-trash"></i> Clear All Data</button>
+        <button id="btnCloseSettings" class="btn-ghost"><i class="bi bi-x-circle"></i> Close</button>
+      </div>
+    </div>
+  </div>
+</div>

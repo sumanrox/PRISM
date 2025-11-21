@@ -1,0 +1,22 @@
+<!-- Documentation Modal -->
+<div id="docsModal" class="hidden fixed inset-0 bg-black bg-opacity-40 items-center justify-center z-50">
+  <div class="modal-content p-4 w-full max-w-4xl border m-4 max-h-screen overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-xl font-medium modal-title"><i class="bi bi-book"></i> Documentation</h3>
+      <button id="btnCloseDocs" class="btn-ghost"><i class="bi bi-x-circle"></i></button>
+    </div>
+    
+    <div class="flex gap-2 mb-4 border-b pb-2">
+      <button id="btnDocReadme" class="doc-tab-btn active px-4 py-2 text-sm font-medium">
+        <i class="bi bi-file-text"></i> Overview
+      </button>
+      <button id="btnDocFeatures" class="doc-tab-btn px-4 py-2 text-sm font-medium">
+        <i class="bi bi-stars"></i> Features
+      </button>
+    </div>
+    
+    <div id="docContent" class="prose prose-sm max-w-none" style="color: var(--text-primary)">
+      <p class="text-center" style="color: var(--text-secondary)">Loading documentation...</p>
+    </div>
+  </div>
+</div>

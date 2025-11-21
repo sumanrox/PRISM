@@ -1,0 +1,27 @@
+<!-- Floating Dock -->
+<aside id="floatingDock" class="fixed right-8 top-1/2 transform -translate-y-1/2 bg-white border shadow-lg p-2 flex flex-col gap-2 z-50" role="navigation" aria-label="Quick actions toolbar">
+  <button id="btnNew" title="New Report" class="dock-btn" aria-label="Create new report"><i class="bi bi-file-earmark-plus" aria-hidden="true"></i></button>
+  <div class="dock-btn-group">
+    <button id="btnLoadOptions" title="Load Options" class="dock-btn" aria-label="Load options menu"><i class="bi bi-folder2-open" aria-hidden="true"></i></button>
+    <div class="dock-dropdown" id="loadDropdown" role="menu">
+      <button id="btnLoadSample" class="dock-dropdown-item" role="menuitem"><i class="bi bi-file-text" aria-hidden="true"></i> Sample Report</button>
+      <button id="btnTemplates" class="dock-dropdown-item" role="menuitem"><i class="bi bi-layout-text-sidebar" aria-hidden="true"></i> Templates</button>
+    </div>
+  </div>
+  <div class="border-t"></div>
+  <button id="btnSaveDraft" title="Save Draft" class="dock-btn" aria-label="Save current draft"><i class="bi bi-save" aria-hidden="true"></i></button>
+  <div class="dock-btn-group">
+    <button id="btnExportOptions" title="Export Options" class="dock-btn" aria-label="Export options menu"><i class="bi bi-box-arrow-up" aria-hidden="true"></i></button>
+    <div class="dock-dropdown" id="exportDropdown" role="menu">
+      <button id="btnPreviewPDF" class="dock-dropdown-item" role="menuitem"><i class="bi bi-eye" aria-hidden="true"></i> Preview PDF</button>
+      <button id="btnDownloadPDF" class="dock-dropdown-item" role="menuitem"><i class="bi bi-download" aria-hidden="true"></i> Download PDF</button>
+      <button id="btnExportMarkdown" class="dock-dropdown-item" role="menuitem"><i class="bi bi-filetype-md" aria-hidden="true"></i> Export Markdown</button>
+    </div>
+  </div>
+  <div class="border-t"></div>
+  <button id="btnSettings" title="Settings" class="dock-btn" aria-label="Open settings"><i class="bi bi-gear" aria-hidden="true"></i></button>
+  <button id="btnDrafts" title="Drafts Manager" class="dock-btn" aria-label="Manage drafts"><i class="bi bi-collection" aria-hidden="true"></i></button>
+  <button id="btnDocs" title="Documentation" class="dock-btn" aria-label="View documentation"><i class="bi bi-book" aria-hidden="true"></i></button>
+  <div class="border-t"></div>
+  <button id="btnTheme" title="Toggle Dark Mode" class="dock-btn" aria-label="Toggle dark mode"><i class="bi bi-moon-fill" aria-hidden="true"></i></button>
+</aside>

@@ -1,0 +1,45 @@
+<div class="step hidden" data-step="3">
+  <section class="border-b pb-3 collapsible-section">
+    <h2 class="text-lg font-medium flex items-center justify-between" data-section="description">
+      <span>Step 3: Description & Impact</span>
+    </h2>
+    <div class="section-content mt-3">
+      <!-- Summary, Steps, Observables, Impact, Mitigation, Notes -->
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Summary (Markdown) <span class="text-red-600">*</span></div>
+        <textarea id="vuln_summary" rows="4" class="input-field monospace"></textarea>
+        <div class="text-xs text-gray-500 mt-1" id="counter_summary"></div>
+        <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+      </label>
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Steps to Reproduce (Markdown) <span class="text-red-600">*</span></div>
+        <textarea id="vuln_steps" rows="6" class="input-field monospace"></textarea>
+        <div class="text-xs text-gray-500 mt-1" id="counter_steps"></div>
+        <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+      </label>
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Observables / Evidence (one per line)</div>
+        <textarea id="vuln_observables" rows="3" class="input-field monospace"></textarea>
+      </label>
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Impact <span class="text-red-600">*</span></div>
+        <textarea id="vuln_impact" rows="3" class="input-field monospace"></textarea>
+        <div class="text-xs text-gray-500 mt-1" id="counter_impact"></div>
+        <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+      </label>
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Mitigation / Recommendations</div>
+        <textarea id="vuln_mitigation" rows="3" class="input-field monospace"></textarea>
+        <div class="text-xs text-gray-500 mt-1" id="counter_mitigation"></div>
+      </label>
+      <label class="block mt-3">
+        <div class="text-xs text-gray-600">Notes for Triage Team</div>
+        <textarea id="vuln_notes" rows="2" class="input-field monospace"></textarea>
+      </label>
+    </div>
+  </section>
+  <div class="flex justify-between mt-4">
+    <button type="button" class="btn-secondary" id="prevStep3">&larr; Previous</button>
+    <button type="button" class="btn-primary" id="nextStep3">Next &rarr;</button>
+  </div>
+</div>

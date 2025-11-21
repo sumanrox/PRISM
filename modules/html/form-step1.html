@@ -1,0 +1,38 @@
+<div class="step" data-step="1">
+  <section class="border-b pb-3 collapsible-section">
+    <h2 class="text-lg font-medium flex items-center justify-between" data-section="reporter">
+      <span>Step 1: Reporter Profile</span>
+    </h2>
+    <div class="section-content mt-3">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <label class="block">
+          <div class="text-xs text-gray-600">Name</div>
+          <input type="text" id="rep_name" class="input-field" />
+        </label>
+        <label class="block">
+          <div class="text-xs text-gray-600">Email</div>
+          <input type="email" id="rep_email" class="input-field" />
+        </label>
+        <label class="block">
+          <div class="text-xs text-gray-600">Handle</div>
+          <input type="text" id="rep_handle" class="input-field" />
+        </label>
+        <label class="block">
+          <div class="text-xs text-gray-600">PGP Key (optional)</div>
+          <input type="text" id="rep_pgp" class="input-field" />
+        </label>
+        <label class="block md:col-span-2">
+          <div class="text-xs text-gray-600">Disclosure Preference</div>
+          <select id="rep_disclosure" class="input-field">
+            <option value="Responsible">Responsible</option>
+            <option value="Coordinated">Coordinated</option>
+            <option value="Public">Public</option>
+          </select>
+        </label>
+      </div>
+    </div>
+  </section>
+  <div class="flex justify-end mt-4">
+    <button type="button" class="btn-primary" id="nextStep1">Next &rarr;</button>
+  </div>
+</div>

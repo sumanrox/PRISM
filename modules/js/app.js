@@ -189,13 +189,11 @@ function showAlert(message, title = 'Notice') {
     const okBtn = document.createElement('button');
     okBtn.className = 'btn-primary';
     okBtn.innerHTML = '<i class="bi bi-check-circle"></i> OK';
-    buttonsEl.appendChild(okBtn);
-    
-    const okBtn = buttonsEl.querySelector('button');
     okBtn.onclick = () => {
       modal.classList.add('hidden');
       resolve(true);
     };
+    buttonsEl.appendChild(okBtn);
     
     modal.classList.remove('hidden');
   });

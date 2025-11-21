@@ -883,6 +883,19 @@ function setupEventListeners() {
     });
   }
 
+  // Dock Drafts button (same functionality as Load Draft)
+  if(btnDrafts){
+    btnDrafts.addEventListener('click', async ()=>{
+      const drafts = VRBStorage.listDrafts();
+      if(!drafts.length){ 
+        await showAlert('No drafts found');
+        return;
+      }
+      renderDraftsModal(drafts);
+      draftsModal.classList.remove('hidden');
+    });
+  }
+
   // PDF actions
   btnPreviewPDF.addEventListener('click', async ()=>{
     const missing = validate();

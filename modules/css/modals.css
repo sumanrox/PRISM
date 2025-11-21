@@ -1,0 +1,148 @@
+/* Modal Styles */
+#settingsModal, #draftsModal, #customModal, #templatesModal, #docsModal {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#settingsModal.hidden, #draftsModal.hidden, #customModal.hidden, #templatesModal.hidden, #docsModal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: var(--bg-secondary);
+  border-color: var(--border-color) !important;
+  transition: background 0.3s;
+}
+
+.modal-title {
+  color: var(--text-primary);
+}
+
+.modal-content .text-sm {
+  color: var(--text-secondary) !important;
+}
+
+.modal-content label span {
+  color: var(--text-primary);
+}
+
+/* Documentation viewer styles */
+.doc-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.doc-tab-btn:hover {
+  color: var(--carbon-blue);
+  background: var(--bg-tertiary);
+}
+
+.doc-tab-btn.active {
+  color: var(--carbon-blue);
+  border-bottom-color: var(--carbon-blue);
+  font-weight: 600;
+}
+
+#docContent {
+  line-height: 1.8;
+}
+
+#docContent h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.5rem;
+}
+
+#docContent h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem;
+  color: var(--text-primary);
+}
+
+#docContent h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem;
+  color: var(--text-primary);
+}
+
+#docContent h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+  color: var(--text-primary);
+}
+
+#docContent p {
+  margin: 0.75rem 0;
+  color: var(--text-primary);
+}
+
+#docContent ul, #docContent ol {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+  color: var(--text-primary);
+}
+
+#docContent li {
+  margin: 0.25rem 0;
+}
+
+#docContent code {
+  background: var(--bg-tertiary);
+  padding: 0.15rem 0.4rem;
+  font-size: 0.9em;
+  font-family: monospace;
+  color: var(--carbon-blue);
+}
+
+#docContent pre {
+  background: var(--bg-tertiary);
+  padding: 1rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  border: 1px solid var(--border-color);
+}
+
+#docContent pre code {
+  background: none;
+  padding: 0;
+  color: var(--text-primary);
+}
+
+#docContent a {
+  color: var(--carbon-blue);
+  text-decoration: underline;
+}
+
+#docContent a:hover {
+  color: #0353e9;
+}
+
+#docContent strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+#docContent hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1.5rem 0;
+}
+
+#docContent blockquote {
+  border-left: 4px solid var(--carbon-blue);
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}

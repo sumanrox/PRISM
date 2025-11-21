@@ -1,0 +1,254 @@
+/* Form inputs and components */
+.input-field {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: border-color 0.15s, background 0.3s, color 0.3s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--carbon-blue);
+  box-shadow: 0 0 0 2px var(--border-focus);
+}
+
+.input-field:disabled {
+  background: var(--bg-tertiary);
+  cursor: not-allowed;
+}
+
+textarea.input-field {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* File input styling */
+.file-input-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+}
+
+.file-input-label:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--carbon-blue);
+}
+
+.file-input-label i {
+  color: var(--carbon-blue);
+}
+
+.file-input {
+  display: none;
+}
+
+/* Buttons */
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 0.25rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.icon-btn:hover {
+  color: var(--text-primary);
+}
+
+.icon-btn:focus {
+  outline: 2px solid rgba(15, 98, 254, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--carbon-blue);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--carbon-blue);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-primary:hover {
+  background: #0353e9;
+}
+
+.btn-primary:focus {
+  outline: 2px solid rgba(15, 98, 254, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background 0.15s, color 0.3s;
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+}
+
+.btn-secondary:focus {
+  outline: 2px solid rgba(15, 98, 254, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text-primary);
+}
+
+.btn-ghost:hover {
+  background: var(--bg-tertiary);
+}
+
+.btn-ghost:focus {
+  outline: 2px solid rgba(15, 98, 254, 0.3);
+  outline-offset: 2px;
+}
+
+.btn-danger {
+  background: #b91c1c;
+  color: white;
+  padding: 0.45rem 0.7rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-danger:hover {
+  background: #991b1b;
+}
+
+.btn-danger:focus {
+  outline: 2px solid rgba(220, 38, 38, 0.3);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+.cursor-move {
+  cursor: move !important;
+}
+
+.monospace {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', 'Courier New', monospace;
+}
+
+/* Collapsible sections */
+.collapsible-section h2 {
+  user-select: none;
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.collapsible-section h2 i {
+  transition: transform 0.2s;
+}
+
+.collapsible-section.collapsed h2 i {
+  transform: rotate(-90deg);
+}
+
+.collapsible-section.collapsed .section-content {
+  display: none;
+}
+
+.collapsible-section {
+  border-color: var(--border-color) !important;
+}
+
+/* Validation messages */
+.validation-message {
+  font-size: 0.75rem;
+}
+
+/* Text colors */
+label .text-xs {
+  color: var(--text-secondary) !important;
+}
+
+.text-gray-600, .text-gray-700, .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+/* Drop area */
+#dropArea {
+  cursor: pointer;
+}
+
+/* Draft list items */
+.draft-item {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.draft-item:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Template cards */
+.template-card {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background 0.2s;
+}
+
+.template-card:hover {
+  background: var(--bg-tertiary);
+}
+
+/* Prose styles for preview */
+.prose img {
+  border: 1px solid #e5e7eb;
+}
+
+/* Step progress bars with smooth transitions */
+#step1Progress, #step2Progress, #step3Progress, #step4Progress {
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Smooth step transitions */
+.step {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .btn-primary, .btn-secondary, .btn-ghost {
+    font-size: 0.875rem;
+    padding: 0.375rem 0.5rem;
+  }
+}

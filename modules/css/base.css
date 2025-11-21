@@ -1,0 +1,65 @@
+/* Base styles and CSS variables */
+:root {
+  --carbon-blue: #0f62fe;
+  --bg-primary: #f3f4f6;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-tertiary: #6b7280;
+  --text-red: #b91c1c;
+  --border-color: #e5e7eb;
+  --border-focus: rgba(15, 98, 254, 0.1);
+  --header-from: #2563eb;
+  --header-to: #4f46e5;
+  --form-border: #2563eb;
+  --pdf-font-family: 'Inter', serif;
+}
+
+/* Dark mode variables */
+body.dark-mode {
+  --bg-primary: #161616;
+  --bg-secondary: #262626;
+  --bg-tertiary: #393939;
+  --text-primary: #f4f4f4;
+  --text-secondary: #c6c6c6;
+  --text-tertiary: #8d8d8d;
+  --border-color: #393939;
+  --border-focus: rgba(15, 98, 254, 0.3);
+  --header-from: #0f62fe;
+  --header-to: #0353e9;
+  --form-border: #0f62fe;
+}
+
+/* Global resets */
+html, body, #app {
+  height: 100%;
+}
+
+* {
+  border-radius: 0 !important; /* Flat design - no rounded corners */
+}
+
+/* Modern scrollbar */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  transition: background 0.2s;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) var(--bg-tertiary);
+}

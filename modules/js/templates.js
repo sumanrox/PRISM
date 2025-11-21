@@ -108,3 +108,5 @@ const VRB_TEMPLATES = {
     }
   }
 };
+
+window.VRB_TEMPLATES = VRB_TEMPLATES;

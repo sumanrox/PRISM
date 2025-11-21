@@ -261,7 +261,7 @@ let fileInput, dropArea, thumbs, btnSaveDraft, btnLoadDraft, btnPreviewPDF, btnD
 let settingsModal, draftsModal, templatesModal, btnSettings, btnDrafts, btnCloseSettings, btnCloseDrafts;
 let btnTemplates, btnCloseTemplates;
 let btnSaveSettings, btnClearData, btnNew, btnLoadSample, btnToggleLayout, btnTheme;
-let autosaveIndicator, mainGrid, completenessBar, completenessPercent, completenessDetails;
+let autosaveIndicator, mainGrid;
 
 let screenshots = [];
 let autosaveTimer = null;
@@ -335,9 +335,6 @@ function initializeApp() {
   btnTheme = qs('#btnTheme');
   autosaveIndicator = qs('#autosaveIndicator');
   mainGrid = qs('#mainGrid');
-  completenessBar = qs('#completenessBar');
-  completenessPercent = qs('#completenessPercent');
-  completenessDetails = qs('#completenessDetails');
 
   screenshots = VRBStorage.loadScreenshots() || [];
   layoutReversed = localStorage.getItem('vrb_layout_reversed') === 'true';
@@ -352,6 +349,7 @@ function initializeApp() {
   initPDFFont();
   initCharacterCounters();
   updateCompletenessIndicator();
+  showStep(1); // Initialize progress bar for step 1
 }
 
 
@@ -400,24 +398,15 @@ function updateCompletenessIndicator() {
   const filledFields = filledRequired + filledOptional;
   const percentage = Math.round((filledFields / totalFields) * 100);
   
-  completenessBar.style.width = percentage + '%';
-  completenessPercent.textContent = percentage + '%';
-  
-  if (missingRequired.length > 0) {
-    completenessDetails.textContent = `Missing required: ${missingRequired.join(', ')}`;
-    completenessDetails.style.color = 'var(--text-red)';
-  } else {
-    completenessDetails.textContent = `All required fields filled! ${filledOptional} optional fields completed.`;
-    completenessDetails.style.color = 'var(--text-secondary)';
-  }
-  
-  // Color coding based on completion
-  if (percentage < 50) {
-    completenessBar.style.backgroundColor = '#da1e28'; // Red
-  } else if (percentage < 80) {
-    completenessBar.style.backgroundColor = '#f1c21b'; // Yellow
-  } else {
-    completenessBar.style.backgroundColor = '#24a148'; // Green
+  const completenessDetails = qs('#completenessDetails');
+  if (completenessDetails) {
+    if (missingRequired.length > 0) {
+      completenessDetails.textContent = `Missing required: ${missingRequired.join(', ')}`;
+      completenessDetails.style.color = 'var(--text-red)';
+    } else {
+      completenessDetails.textContent = `✓ All required fields complete! ${filledOptional} optional fields filled.`;
+      completenessDetails.style.color = '#24a148';
+    }
   }
 }
 
@@ -1161,6 +1150,88 @@ function setupEventListeners() {
       }
     });
   }
+
+  // Multistep form navigation
+  const nextStep1 = qs('#nextStep1');
+  const nextStep2 = qs('#nextStep2');
+  const nextStep3 = qs('#nextStep3');
+  const prevStep2 = qs('#prevStep2');
+  const prevStep3 = qs('#prevStep3');
+  const prevStep4 = qs('#prevStep4');
+
+  if(nextStep1) nextStep1.addEventListener('click', () => showStep(2));
+  if(nextStep2) nextStep2.addEventListener('click', () => showStep(3));
+  if(nextStep3) nextStep3.addEventListener('click', () => showStep(4));
+  if(prevStep2) prevStep2.addEventListener('click', () => showStep(1));
+  if(prevStep3) prevStep3.addEventListener('click', () => showStep(2));
+  if(prevStep4) prevStep4.addEventListener('click', () => showStep(3));
+
+  // Generate Report button - generates and previews PDF
+  const generateReportBtn = qs('#submitReport');
+  if(generateReportBtn) {
+    generateReportBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const missing = validate();
+      if(missing.length){
+        const proceed = await showConfirm('Required fields missing: ' + missing.join(', ') + '. Generate anyway?', 'Missing Fields');
+        if(!proceed) return;
+      }
+      const data = buildDataModel();
+      VRBPDF.previewPrintable(data);
+    });
+  }
+}
+
+function showStep(stepNum) {
+  const steps = qsa('.step');
+  
+  // Fade out current step
+  steps.forEach((step, index) => {
+    if (!step.classList.contains('hidden')) {
+      step.style.opacity = '0';
+      step.style.transform = 'translateY(10px)';
+    }
+  });
+  
+  // Wait for fade out, then switch steps
+  setTimeout(() => {
+    steps.forEach((step, index) => {
+      if (index + 1 === stepNum) {
+        step.classList.remove('hidden');
+        // Trigger reflow
+        void step.offsetWidth;
+        step.style.opacity = '1';
+        step.style.transform = 'translateY(0)';
+      } else {
+        step.classList.add('hidden');
+      }
+    });
+  }, 150);
+  
+  // Update step progress indicator
+  const currentStepText = qs('#currentStepText');
+  if (currentStepText) {
+    currentStepText.textContent = `Step ${stepNum} of 4`;
+  }
+  
+  // Update step progress bars with smooth transition
+  for (let i = 1; i <= 4; i++) {
+    const progressBar = qs(`#step${i}Progress`);
+    if (progressBar) {
+      if (i < stepNum) {
+        // Completed steps - green
+        progressBar.style.backgroundColor = '#24a148';
+      } else if (i === stepNum) {
+        // Current step - blue
+        progressBar.style.backgroundColor = '#0f62fe';
+      } else {
+        // Upcoming steps - gray
+        progressBar.style.backgroundColor = '#e5e7eb';
+      }
+    }
+  }
+  
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Documentation helper functions

@@ -1,0 +1,106 @@
+/* Layout and background styles */
+body {
+  font-family: var(--pdf-font-family);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  transition: background 0.3s, color 0.3s;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(252, 163, 17, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(15, 98, 254, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
+}
+
+body.dark-mode {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background-attachment: fixed;
+}
+
+body.dark-mode::before {
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(15, 98, 254, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(252, 163, 17, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(120, 119, 198, 0.12) 0%, transparent 50%);
+  opacity: 0.5;
+}
+
+/* Ensure content is above background overlay */
+.app-header, main, aside {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header */
+.app-header {
+  box-shadow: none;
+}
+
+.app-header .bg-gradient-to-r {
+  background: linear-gradient(to right, var(--header-from), var(--header-to)) !important;
+  transition: background 0.3s;
+}
+
+/* Form builder */
+#formColumn {
+  border: 2px solid var(--form-border) !important;
+  background: var(--bg-secondary) !important;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+/* Layout switching */
+#mainGrid.layout-reversed {
+  grid-template-rows: auto auto;
+}
+
+#mainGrid.layout-reversed #previewColumn {
+  order: -1;
+}
+
+#mainGrid.layout-reversed #formColumn {
+  order: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1023px) {
+  .app-header h1 {
+    font-size: 1rem;
+  }
+  .app-header .icon-btn {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  #thumbs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media print {
+  header, .btn-primary, .btn-secondary, .btn-ghost, #settingsModal, #draftsModal, #autosaveIndicator {
+    display: none !important;
+  }
+  body {
+    background: white;
+  }
+  #formColumn {
+    display: none;
+  }
+  #previewColumn {
+    border: none;
+    padding: 0;
+  }
+}

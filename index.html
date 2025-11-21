@@ -49,8 +49,12 @@
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
-  <!-- App styles -->
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- App styles - Modular CSS -->
+  <link rel="stylesheet" href="modules/css/base.css">
+  <link rel="stylesheet" href="modules/css/layout.css">
+  <link rel="stylesheet" href="modules/css/components.css">
+  <link rel="stylesheet" href="modules/css/dock.css">
+  <link rel="stylesheet" href="modules/css/modals.css">
 
   <!-- Structured Data (JSON-LD) -->
   <script type="application/ld+json">
@@ -132,353 +136,381 @@
     <div id="mainGrid" class="grid grid-cols-1 gap-6">
       <!-- Report Builder Form -->
       <section class="bg-white border-2 border-blue-600 p-4 shadow-sm" id="formColumn" aria-label="Vulnerability report form">
-        <!-- Completeness Indicator -->
+        <!-- Multi-Step Progress Indicator -->
         <div class="mb-4 pb-3 border-b">
           <div class="flex items-center justify-between mb-2">
-            <div class="text-sm font-medium">Report Completeness</div>
-            <div id="completenessPercent" class="text-sm font-medium">0%</div>
+            <div class="text-sm font-medium">Progress</div>
+            <div id="currentStepText" class="text-sm font-medium">Step 1 of 4</div>
           </div>
-          <div class="w-full bg-gray-200 h-2" style="border: 1px solid var(--border-color);">
-            <div id="completenessBar" class="h-full transition-all duration-300" style="width: 0%; background-color: var(--carbon-blue);"></div>
+          <div class="flex gap-1">
+            <div id="step1Progress" class="flex-1 h-2 bg-blue-600 transition-all duration-300" style="border: 1px solid var(--border-color);"></div>
+            <div id="step2Progress" class="flex-1 h-2 bg-gray-200 transition-all duration-300" style="border: 1px solid var(--border-color);"></div>
+            <div id="step3Progress" class="flex-1 h-2 bg-gray-200 transition-all duration-300" style="border: 1px solid var(--border-color);"></div>
+            <div id="step4Progress" class="flex-1 h-2 bg-gray-200 transition-all duration-300" style="border: 1px solid var(--border-color);"></div>
           </div>
-          <div id="completenessDetails" class="text-xs text-gray-500 mt-1"></div>
+          <div id="completenessDetails" class="text-xs text-gray-500 mt-2"></div>
         </div>
         
         <form id="reportForm" class="space-y-4">
-          <section class="border-b pb-3 collapsible-section">
-            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="reporter">
-              <span>Reporter Profile</span>
-              <i class="bi bi-chevron-down"></i>
-            </h2>
-            <div class="section-content mt-3">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <label class="block">
-                  <div class="text-xs text-gray-600">Name</div>
-                  <input type="text" id="rep_name" class="input-field" />
-                </label>
-                <label class="block">
-                  <div class="text-xs text-gray-600">Email</div>
-                  <input type="email" id="rep_email" class="input-field" />
-                </label>
-                <label class="block">
-                  <div class="text-xs text-gray-600">Handle</div>
-                  <input type="text" id="rep_handle" class="input-field" />
-                </label>
-                <label class="block">
-                  <div class="text-xs text-gray-600">PGP Key (optional)</div>
-                  <input type="text" id="rep_pgp" class="input-field" />
-                </label>
-                <label class="block md:col-span-2">
-                  <div class="text-xs text-gray-600">Disclosure Preference</div>
-                  <select id="rep_disclosure" class="input-field">
-                    <option value="Responsible">Responsible</option>
-                    <option value="Coordinated">Coordinated</option>
-                    <option value="Public">Public</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section class="border-b pb-3 collapsible-section">
-            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="vulnerability">
-              <span>Vulnerability Details</span>
-              <i class="bi bi-chevron-down"></i>
-            </h2>
-            <div class="section-content mt-3">
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Title <span class="text-red-600">*</span></div>
-              <input type="text" id="vuln_title" class="input-field" required />
-              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
-            </label>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
-              <label>
-                <div class="text-xs text-gray-600">VRT Category</div>
-                <select id="vuln_category" class="input-field">
-                  <option value="">Select Category...</option>
-                  <optgroup label="Injection">
-                    <option value="sql-injection">SQL Injection</option>
-                    <option value="code-injection">Code Injection</option>
-                    <option value="command-injection">Command Injection</option>
-                    <option value="ldap-injection">LDAP Injection</option>
-                    <option value="xpath-injection">XPath Injection</option>
-                    <option value="xml-injection">XML Injection</option>
-                    <option value="ssi-injection">SSI Injection</option>
-                  </optgroup>
-                  <optgroup label="Cross-Site Scripting (XSS)">
-                    <option value="xss-reflected">Reflected XSS</option>
-                    <option value="xss-stored">Stored XSS</option>
-                    <option value="xss-dom">DOM-based XSS</option>
-                    <option value="xss-self">Self XSS</option>
-                  </optgroup>
-                  <optgroup label="Authentication & Authorization">
-                    <option value="auth-bypass">Authentication Bypass</option>
-                    <option value="broken-auth">Broken Authentication</option>
-                    <option value="session-fixation">Session Fixation</option>
-                    <option value="privilege-escalation">Privilege Escalation</option>
-                    <option value="idor">Insecure Direct Object Reference (IDOR)</option>
-                    <option value="missing-auth">Missing Authorization</option>
-                  </optgroup>
-                  <optgroup label="CSRF & Request Forgery">
-                    <option value="csrf">Cross-Site Request Forgery (CSRF)</option>
-                    <option value="ssrf">Server-Side Request Forgery (SSRF)</option>
-                  </optgroup>
-                  <optgroup label="Information Disclosure">
-                    <option value="info-sensitive">Sensitive Data Exposure</option>
-                    <option value="info-directory">Directory Listing</option>
-                    <option value="info-error">Verbose Error Messages</option>
-                    <option value="info-backup">Backup File Disclosure</option>
-                    <option value="info-config">Configuration Exposure</option>
-                  </optgroup>
-                  <optgroup label="Cryptographic Issues">
-                    <option value="crypto-weak">Weak Cryptography</option>
-                    <option value="crypto-ssl">Insecure SSL/TLS</option>
-                    <option value="crypto-random">Weak Random Number Generation</option>
-                    <option value="crypto-hashing">Insecure Password Hashing</option>
-                  </optgroup>
-                  <optgroup label="Business Logic">
-                    <option value="logic-race">Race Condition</option>
-                    <option value="logic-bypass">Business Logic Bypass</option>
-                    <option value="logic-workflow">Workflow Violation</option>
-                  </optgroup>
-                  <optgroup label="File Handling">
-                    <option value="file-upload">Unrestricted File Upload</option>
-                    <option value="file-inclusion">Local/Remote File Inclusion</option>
-                    <option value="file-traversal">Path Traversal</option>
-                    <option value="file-download">Arbitrary File Download</option>
-                  </optgroup>
-                  <optgroup label="Security Misconfiguration">
-                    <option value="config-default">Default Credentials</option>
-                    <option value="config-cors">Misconfigured CORS</option>
-                    <option value="config-headers">Missing Security Headers</option>
-                    <option value="config-debug">Debug Mode Enabled</option>
-                  </optgroup>
-                  <optgroup label="Denial of Service">
-                    <option value="dos-application">Application DoS</option>
-                    <option value="dos-regex">Regular Expression DoS (ReDoS)</option>
-                    <option value="dos-resource">Resource Exhaustion</option>
-                  </optgroup>
-                  <optgroup label="API & Web Services">
-                    <option value="api-auth">API Authentication Bypass</option>
-                    <option value="api-rate">Missing Rate Limiting</option>
-                    <option value="api-mass">Mass Assignment</option>
-                    <option value="api-excessive">Excessive Data Exposure</option>
-                  </optgroup>
-                  <optgroup label="Mobile">
-                    <option value="mobile-insecure-storage">Insecure Data Storage</option>
-                    <option value="mobile-hardcoded">Hardcoded Secrets</option>
-                    <option value="mobile-ssl">SSL Pinning Bypass</option>
-                  </optgroup>
-                  <optgroup label="Other">
-                    <option value="clickjacking">Clickjacking</option>
-                    <option value="open-redirect">Open Redirect</option>
-                    <option value="xxe">XML External Entity (XXE)</option>
-                    <option value="deserialization">Insecure Deserialization</option>
-                    <option value="other">Other/Uncategorized</option>
-                  </optgroup>
-                </select>
-              </label>
-
-              <label>
-                <div class="text-xs text-gray-600">Severity</div>
-                <select id="vuln_severity" class="input-field">
-                  <option>Informational</option>
-                  <option>Low</option>
-                  <option>Medium</option>
-                  <option>High</option>
-                  <option>Critical</option>
-                </select>
-              </label>
-            </div>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">OWASP Top 10 2025</div>
-              <select id="vuln_owasp" class="input-field">
-                <option value="">Select OWASP Category...</option>
-                <option value="A01:2025">A01:2025 - Broken Access Control</option>
-                <option value="A02:2025">A02:2025 - Cryptographic Failures</option>
-                <option value="A03:2025">A03:2025 - Injection</option>
-                <option value="A04:2025">A04:2025 - Insecure Design</option>
-                <option value="A05:2025">A05:2025 - Security Misconfiguration</option>
-                <option value="A06:2025">A06:2025 - Vulnerable and Outdated Components</option>
-                <option value="A07:2025">A07:2025 - Identification and Authentication Failures</option>
-                <option value="A08:2025">A08:2025 - Software and Data Integrity Failures</option>
-                <option value="A09:2025">A09:2025 - Security Logging and Monitoring Failures</option>
-                <option value="A10:2025">A10:2025 - Server-Side Request Forgery (SSRF)</option>
-              </select>
-            </label>
-
-            <!-- CVSS Calculator -->
-            <div class="mt-3">
-              <div class="flex items-center justify-between mb-1">
-                <div class="text-xs text-gray-600">CVSS v3.1 Calculator</div>
-                <button type="button" id="btnResetCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0">Reset</button>
-              </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <!-- Attack Vector -->
-                <label>
-                  <div class="text-xs text-gray-600">Attack Vector (AV)</div>
-                  <select id="cvss_av" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">Network (N)</option>
-                    <option value="A">Adjacent (A)</option>
-                    <option value="L">Local (L)</option>
-                    <option value="P">Physical (P)</option>
-                  </select>
-                </label>
-
-                <!-- Attack Complexity -->
-                <label>
-                  <div class="text-xs text-gray-600">Attack Complexity (AC)</div>
-                  <select id="cvss_ac" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="L">Low (L)</option>
-                    <option value="H">High (H)</option>
-                  </select>
-                </label>
-
-                <!-- Privileges Required -->
-                <label>
-                  <div class="text-xs text-gray-600">Privileges Required (PR)</div>
-                  <select id="cvss_pr" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">None (N)</option>
-                    <option value="L">Low (L)</option>
-                    <option value="H">High (H)</option>
-                  </select>
-                </label>
-
-                <!-- User Interaction -->
-                <label>
-                  <div class="text-xs text-gray-600">User Interaction (UI)</div>
-                  <select id="cvss_ui" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">None (N)</option>
-                    <option value="R">Required (R)</option>
-                  </select>
-                </label>
-
-                <!-- Scope -->
-                <label>
-                  <div class="text-xs text-gray-600">Scope (S)</div>
-                  <select id="cvss_s" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="U">Unchanged (U)</option>
-                    <option value="C">Changed (C)</option>
-                  </select>
-                </label>
-
-                <!-- Confidentiality -->
-                <label>
-                  <div class="text-xs text-gray-600">Confidentiality (C)</div>
-                  <select id="cvss_c" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">None (N)</option>
-                    <option value="L">Low (L)</option>
-                    <option value="H">High (H)</option>
-                  </select>
-                </label>
-
-                <!-- Integrity -->
-                <label>
-                  <div class="text-xs text-gray-600">Integrity (I)</div>
-                  <select id="cvss_i" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">None (N)</option>
-                    <option value="L">Low (L)</option>
-                    <option value="H">High (H)</option>
-                  </select>
-                </label>
-
-                <!-- Availability -->
-                <label>
-                  <div class="text-xs text-gray-600">Availability (A)</div>
-                  <select id="cvss_a" class="input-field text-sm">
-                    <option value="">-</option>
-                    <option value="N">None (N)</option>
-                    <option value="L">Low (L)</option>
-                    <option value="H">High (H)</option>
-                  </select>
-                </label>
-              </div>
-
-              <!-- CVSS Results -->
-              <div class="mt-2 p-2 border" style="background: var(--bg-tertiary); border-color: var(--border-color)">
-                <div class="mb-2">
-                  <div class="flex items-center justify-between mb-1">
-                    <div class="text-xs text-gray-600">CVSS Vector String</div>
-                    <button type="button" id="btnCopyCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0" title="Copy to clipboard">
-                      <i class="bi bi-clipboard"></i> Copy
-                    </button>
+          <div id="multistepForm">
+            <div class="step" data-step="1">
+              <section class="border-b pb-3 collapsible-section">
+                <h2 class="text-lg font-medium flex items-center justify-between" data-section="reporter">
+                  <span>Step 1: Reporter Profile</span>
+                </h2>
+                <div class="section-content mt-3">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <label class="block">
+                      <div class="text-xs text-gray-600">Name</div>
+                      <input type="text" id="rep_name" class="input-field" />
+                    </label>
+                    <label class="block">
+                      <div class="text-xs text-gray-600">Email</div>
+                      <input type="email" id="rep_email" class="input-field" />
+                    </label>
+                    <label class="block">
+                      <div class="text-xs text-gray-600">Handle</div>
+                      <input type="text" id="rep_handle" class="input-field" />
+                    </label>
+                    <label class="block">
+                      <div class="text-xs text-gray-600">PGP Key (optional)</div>
+                      <input type="text" id="rep_pgp" class="input-field" />
+                    </label>
+                    <label class="block md:col-span-2">
+                      <div class="text-xs text-gray-600">Disclosure Preference</div>
+                      <select id="rep_disclosure" class="input-field">
+                        <option value="Responsible">Responsible</option>
+                        <option value="Coordinated">Coordinated</option>
+                        <option value="Public">Public</option>
+                      </select>
+                    </label>
                   </div>
-                  <input type="text" id="cvss_vector" class="input-field font-mono text-sm" placeholder="Paste or generate CVSS vector" style="color: var(--text-primary)" />
                 </div>
-                <div class="flex items-center justify-between">
-                  <div>
-                    <div class="text-xs text-gray-600">Base Score</div>
-                    <div id="cvss_score" class="text-2xl font-bold" style="color: var(--text-primary)">-</div>
-                  </div>
-                  <div class="text-right">
+              </section>
+              <div class="flex justify-end mt-4">
+                <button type="button" class="btn-primary" id="nextStep1">Next &rarr;</button>
+              </div>
+            </div>
+
+            <div class="step hidden" data-step="2">
+              <section class="border-b pb-3 collapsible-section">
+                <h2 class="text-lg font-medium flex items-center justify-between" data-section="vulnerability">
+                  <span>Step 2: Vulnerability Details</span>
+                </h2>
+                <div class="section-content mt-3">
+                <label class="block mt-3">
+                  <div class="text-xs text-gray-600">Title <span class="text-red-600">*</span></div>
+                  <input type="text" id="vuln_title" class="input-field" required />
+                  <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+                </label>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
+                  <label>
+                    <div class="text-xs text-gray-600">VRT Category</div>
+                    <select id="vuln_category" class="input-field">
+                      <option value="">Select Category...</option>
+                      <optgroup label="Injection">
+                        <option value="sql-injection">SQL Injection</option>
+                        <option value="code-injection">Code Injection</option>
+                        <option value="command-injection">Command Injection</option>
+                        <option value="ldap-injection">LDAP Injection</option>
+                        <option value="xpath-injection">XPath Injection</option>
+                        <option value="xml-injection">XML Injection</option>
+                        <option value="ssi-injection">SSI Injection</option>
+                      </optgroup>
+                      <optgroup label="Cross-Site Scripting (XSS)">
+                        <option value="xss-reflected">Reflected XSS</option>
+                        <option value="xss-stored">Stored XSS</option>
+                        <option value="xss-dom">DOM-based XSS</option>
+                        <option value="xss-self">Self XSS</option>
+                      </optgroup>
+                      <optgroup label="Authentication & Authorization">
+                        <option value="auth-bypass">Authentication Bypass</option>
+                        <option value="broken-auth">Broken Authentication</option>
+                        <option value="session-fixation">Session Fixation</option>
+                        <option value="privilege-escalation">Privilege Escalation</option>
+                        <option value="idor">Insecure Direct Object Reference (IDOR)</option>
+                        <option value="missing-auth">Missing Authorization</option>
+                      </optgroup>
+                      <optgroup label="CSRF & Request Forgery">
+                        <option value="csrf">Cross-Site Request Forgery (CSRF)</option>
+                        <option value="ssrf">Server-Side Request Forgery (SSRF)</option>
+                      </optgroup>
+                      <optgroup label="Information Disclosure">
+                        <option value="info-sensitive">Sensitive Data Exposure</option>
+                        <option value="info-directory">Directory Listing</option>
+                        <option value="info-error">Verbose Error Messages</option>
+                        <option value="info-backup">Backup File Disclosure</option>
+                        <option value="info-config">Configuration Exposure</option>
+                      </optgroup>
+                      <optgroup label="Cryptographic Issues">
+                        <option value="crypto-weak">Weak Cryptography</option>
+                        <option value="crypto-ssl">Insecure SSL/TLS</option>
+                        <option value="crypto-random">Weak Random Number Generation</option>
+                        <option value="crypto-hashing">Insecure Password Hashing</option>
+                      </optgroup>
+                      <optgroup label="Business Logic">
+                        <option value="logic-race">Race Condition</option>
+                        <option value="logic-bypass">Business Logic Bypass</option>
+                        <option value="logic-workflow">Workflow Violation</option>
+                      </optgroup>
+                      <optgroup label="File Handling">
+                        <option value="file-upload">Unrestricted File Upload</option>
+                        <option value="file-inclusion">Local/Remote File Inclusion</option>
+                        <option value="file-traversal">Path Traversal</option>
+                        <option value="file-download">Arbitrary File Download</option>
+                      </optgroup>
+                      <optgroup label="Security Misconfiguration">
+                        <option value="config-default">Default Credentials</option>
+                        <option value="config-cors">Misconfigured CORS</option>
+                        <option value="config-headers">Missing Security Headers</option>
+                        <option value="config-debug">Debug Mode Enabled</option>
+                      </optgroup>
+                      <optgroup label="Denial of Service">
+                        <option value="dos-application">Application DoS</option>
+                        <option value="dos-regex">Regular Expression DoS (ReDoS)</option>
+                        <option value="dos-resource">Resource Exhaustion</option>
+                      </optgroup>
+                      <optgroup label="API & Web Services">
+                        <option value="api-auth">API Authentication Bypass</option>
+                        <option value="api-rate">Missing Rate Limiting</option>
+                        <option value="api-mass">Mass Assignment</option>
+                        <option value="api-excessive">Excessive Data Exposure</option>
+                      </optgroup>
+                      <optgroup label="Mobile">
+                        <option value="mobile-insecure-storage">Insecure Data Storage</option>
+                        <option value="mobile-hardcoded">Hardcoded Secrets</option>
+                        <option value="mobile-ssl">SSL Pinning Bypass</option>
+                      </optgroup>
+                      <optgroup label="Other">
+                        <option value="clickjacking">Clickjacking</option>
+                        <option value="open-redirect">Open Redirect</option>
+                        <option value="xxe">XML External Entity (XXE)</option>
+                        <option value="deserialization">Insecure Deserialization</option>
+                        <option value="other">Other/Uncategorized</option>
+                      </optgroup>
+                    </select>
+                  </label>
+
+                  <label>
                     <div class="text-xs text-gray-600">Severity</div>
-                    <div id="cvss_severity" class="text-xs font-bold">-</div>
+                    <select id="vuln_severity" class="input-field">
+                      <option>Informational</option>
+                      <option>Low</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                      <option>Critical</option>
+                    </select>
+                  </label>
+                </div>
+
+                <label class="block mt-3">
+                  <div class="text-xs text-gray-600">OWASP Top 10 2025</div>
+                  <select id="vuln_owasp" class="input-field">
+                    <option value="">Select OWASP Category...</option>
+                    <option value="A01:2025">A01:2025 - Broken Access Control</option>
+                    <option value="A02:2025">A02:2025 - Cryptographic Failures</option>
+                    <option value="A03:2025">A03:2025 - Injection</option>
+                    <option value="A04:2025">A04:2025 - Insecure Design</option>
+                    <option value="A05:2025">A05:2025 - Security Misconfiguration</option>
+                    <option value="A06:2025">A06:2025 - Vulnerable and Outdated Components</option>
+                    <option value="A07:2025">A07:2025 - Identification and Authentication Failures</option>
+                    <option value="A08:2025">A08:2025 - Software and Data Integrity Failures</option>
+                    <option value="A09:2025">A09:2025 - Security Logging and Monitoring Failures</option>
+                    <option value="A10:2025">A10:2025 - Server-Side Request Forgery (SSRF)</option>
+                  </select>
+                </label>
+
+                <!-- CVSS Calculator -->
+                <div class="mt-3">
+                  <div class="flex items-center justify-between mb-1">
+                    <div class="text-xs text-gray-600">CVSS v3.1 Calculator</div>
+                    <button type="button" id="btnResetCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0">Reset</button>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <!-- Attack Vector -->
+                    <label>
+                      <div class="text-xs text-gray-600">Attack Vector (AV)</div>
+                      <select id="cvss_av" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">Network (N)</option>
+                        <option value="A">Adjacent (A)</option>
+                        <option value="L">Local (L)</option>
+                        <option value="P">Physical (P)</option>
+                      </select>
+                    </label>
+
+                    <!-- Attack Complexity -->
+                    <label>
+                      <div class="text-xs text-gray-600">Attack Complexity (AC)</div>
+                      <select id="cvss_ac" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="L">Low (L)</option>
+                        <option value="H">High (H)</option>
+                      </select>
+                    </label>
+
+                    <!-- Privileges Required -->
+                    <label>
+                      <div class="text-xs text-gray-600">Privileges Required (PR)</div>
+                      <select id="cvss_pr" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">None (N)</option>
+                        <option value="L">Low (L)</option>
+                        <option value="H">High (H)</option>
+                      </select>
+                    </label>
+
+                    <!-- User Interaction -->
+                    <label>
+                      <div class="text-xs text-gray-600">User Interaction (UI)</div>
+                      <select id="cvss_ui" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">None (N)</option>
+                        <option value="R">Required (R)</option>
+                      </select>
+                    </label>
+
+                    <!-- Scope -->
+                    <label>
+                      <div class="text-xs text-gray-600">Scope (S)</div>
+                      <select id="cvss_s" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="U">Unchanged (U)</option>
+                        <option value="C">Changed (C)</option>
+                      </select>
+                    </label>
+
+                    <!-- Confidentiality -->
+                    <label>
+                      <div class="text-xs text-gray-600">Confidentiality (C)</div>
+                      <select id="cvss_c" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">None (N)</option>
+                        <option value="L">Low (L)</option>
+                        <option value="H">High (H)</option>
+                      </select>
+                    </label>
+
+                    <!-- Integrity -->
+                    <label>
+                      <div class="text-xs text-gray-600">Integrity (I)</div>
+                      <select id="cvss_i" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">None (N)</option>
+                        <option value="L">Low (L)</option>
+                        <option value="H">High (H)</option>
+                      </select>
+                    </label>
+
+                    <!-- Availability -->
+                    <label>
+                      <div class="text-xs text-gray-600">Availability (A)</div>
+                      <select id="cvss_a" class="input-field text-sm">
+                        <option value="">-</option>
+                        <option value="N">None (N)</option>
+                        <option value="L">Low (L)</option>
+                        <option value="H">High (H)</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <!-- CVSS Results -->
+                  <div class="mt-2 p-2 border" style="background: var(--bg-tertiary); border-color: var(--border-color)">
+                    <div class="mb-2">
+                      <div class="flex items-center justify-between mb-1">
+                        <div class="text-xs text-gray-600">CVSS Vector String</div>
+                        <button type="button" id="btnCopyCVSS" class="text-xs text-gray-500 hover:text-gray-700" style="padding:0" title="Copy to clipboard">
+                          <i class="bi bi-clipboard"></i> Copy
+                        </button>
+                      </div>
+                      <input type="text" id="cvss_vector" class="input-field font-mono text-sm" placeholder="Paste or generate CVSS vector" style="color: var(--text-primary)" />
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="text-xs text-gray-600">Base Score</div>
+                        <div id="cvss_score" class="text-2xl font-bold" style="color: var(--text-primary)">-</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-xs text-gray-600">Severity</div>
+                        <div id="cvss_severity" class="text-xs font-bold">-</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+                </div>
+              </section>
+              <div class="flex justify-between mt-4">
+                <button type="button" class="btn-secondary" id="prevStep2">&larr; Back</button>
+                <button type="button" class="btn-primary" id="nextStep2">Next &rarr;</button>
               </div>
             </div>
 
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Summary (Markdown) <span class="text-red-600">*</span></div>
-              <textarea id="vuln_summary" rows="4" class="input-field monospace"></textarea>
-              <div class="text-xs text-gray-500 mt-1" id="counter_summary"></div>
-              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
-            </label>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Steps to Reproduce (Markdown) <span class="text-red-600">*</span></div>
-              <textarea id="vuln_steps" rows="6" class="input-field monospace"></textarea>
-              <div class="text-xs text-gray-500 mt-1" id="counter_steps"></div>
-              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
-            </label>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Observables / Evidence (one per line)</div>
-              <textarea id="vuln_observables" rows="3" class="input-field monospace"></textarea>
-            </label>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Impact <span class="text-red-600">*</span></div>
-              <textarea id="vuln_impact" rows="3" class="input-field monospace"></textarea>
-              <div class="text-xs text-gray-500 mt-1" id="counter_impact"></div>
-              <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
-            </label>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Mitigation / Recommendations</div>
-              <textarea id="vuln_mitigation" rows="3" class="input-field monospace"></textarea>
-              <div class="text-xs text-gray-500 mt-1" id="counter_mitigation"></div>
-            </label>
-
-            <label class="block mt-3">
-              <div class="text-xs text-gray-600">Notes for Triage Team</div>
-              <textarea id="vuln_notes" rows="2" class="input-field monospace"></textarea>
-            </label>
-            </div>
-          </section>
-
-          <section class="border-b pb-3 collapsible-section">
-            <h2 class="text-lg font-medium cursor-pointer flex items-center justify-between" data-section="screenshots">
-              <span>Screenshots & Evidence</span>
-              <i class="bi bi-chevron-down"></i>
-            </h2>
-            <div class="section-content mt-3">
-              <div id="dropArea" class="border-dashed border-2 p-4 text-center text-sm text-gray-600">Drag & drop images here, or <label for="fileInput" class="text-blue-600 cursor-pointer">choose files</label>
-                <input id="fileInput" type="file" accept="image/png,image/jpeg" multiple hidden />
+            <div class="step hidden" data-step="3">
+              <section class="border-b pb-3 collapsible-section">
+                <h2 class="text-lg font-medium flex items-center justify-between" data-section="description">
+                  <span>Step 3: Description & Impact</span>
+                </h2>
+                <div class="section-content mt-3">
+                  <!-- Summary, Steps, Observables, Impact, Mitigation, Notes -->
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Summary (Markdown) <span class="text-red-600">*</span></div>
+                    <textarea id="vuln_summary" rows="4" class="input-field monospace"></textarea>
+                    <div class="text-xs text-gray-500 mt-1" id="counter_summary"></div>
+                    <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+                  </label>
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Steps to Reproduce (Markdown) <span class="text-red-600">*</span></div>
+                    <textarea id="vuln_steps" rows="6" class="input-field monospace"></textarea>
+                    <div class="text-xs text-gray-500 mt-1" id="counter_steps"></div>
+                    <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+                  </label>
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Observables / Evidence (one per line)</div>
+                    <textarea id="vuln_observables" rows="3" class="input-field monospace"></textarea>
+                  </label>
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Impact <span class="text-red-600">*</span></div>
+                    <textarea id="vuln_impact" rows="3" class="input-field monospace"></textarea>
+                    <div class="text-xs text-gray-500 mt-1" id="counter_impact"></div>
+                    <div class="validation-message hidden text-red-600 text-xs mt-1"></div>
+                  </label>
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Mitigation / Recommendations</div>
+                    <textarea id="vuln_mitigation" rows="3" class="input-field monospace"></textarea>
+                    <div class="text-xs text-gray-500 mt-1" id="counter_mitigation"></div>
+                  </label>
+                  <label class="block mt-3">
+                    <div class="text-xs text-gray-600">Notes for Triage Team</div>
+                    <textarea id="vuln_notes" rows="2" class="input-field monospace"></textarea>
+                  </label>
+                </div>
+              </section>
+              <div class="flex justify-between mt-4">
+                <button type="button" class="btn-secondary" id="prevStep3">&larr; Previous</button>
+                <button type="button" class="btn-primary" id="nextStep3">Next &rarr;</button>
               </div>
-              <div id="thumbs" class="mt-3 grid grid-cols-3 gap-2"></div>
             </div>
-          </section>
+
+            <div class="step hidden" data-step="4">
+              <section class="border-b pb-3 collapsible-section">
+                <h2 class="text-lg font-medium flex items-center justify-between" data-section="screenshots">
+                  <span>Step 4: Screenshots & Evidence</span>
+                </h2>
+                <div class="section-content mt-3">
+                  <div id="dropArea" class="border-dashed border-2 p-4 text-center text-sm text-gray-600">Drag & drop images here, or <label for="fileInput" class="text-blue-600 cursor-pointer">choose files</label>
+                    <input id="fileInput" type="file" accept="image/png,image/jpeg" multiple hidden />
+                  </div>
+                  <div id="thumbs" class="mt-3 grid grid-cols-3 gap-2"></div>
+                </div>
+              </section>
+              <div class="flex justify-between mt-4">
+                <button type="button" class="btn-secondary" id="prevStep4">&larr; Previous</button>
+                <button type="submit" class="btn-primary" id="submitReport">Generate Form</button>
+              </div>
+            </div>
+          </div>
 
           <div id="autosaveIndicator" class="text-xs text-gray-600 mt-1 hidden">Autosaved just now</div>
         </form>
@@ -608,10 +640,10 @@
     </div>
   </div>
 
-  <script src="js/storage.js"></script>
-  <script src="js/sample-data.js"></script>
-  <script src="js/templates.js"></script>
-  <script src="js/pdf.js"></script>
-  <script src="js/app.js"></script>
+  <script src="modules/js/storage.js"></script>
+  <script src="modules/js/sample-data.js"></script>
+  <script src="modules/js/templates.js"></script>
+  <script src="modules/js/pdf.js"></script>
+  <script src="modules/js/app.js"></script>
 </body>
 </html>

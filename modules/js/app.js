@@ -4,6 +4,25 @@
 const qs = s => document.querySelector(s);
 const qsa = s => Array.from(document.querySelectorAll(s));
 
+// Security: Sanitize text content to prevent XSS
+function sanitizeText(text) {
+  if (!text) return '';
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Security: Create text node safely
+function createTextNode(text) {
+  return document.createTextNode(text || '');
+}
+
+// Security: Set text content safely
+function setTextContent(element, text) {
+  if (!element) return;
+  element.textContent = text || '';
+}
+
 // Google Fonts list cache
 let googleFontsList = null;
 
@@ -166,7 +185,11 @@ function showAlert(message, title = 'Notice') {
     titleEl.textContent = title;
     bodyEl.textContent = message;
     inputEl.classList.add('hidden');
-    buttonsEl.innerHTML = '<button class="btn-primary"><i class="bi bi-check-circle"></i> OK</button>';
+    buttonsEl.innerHTML = '';
+    const okBtn = document.createElement('button');
+    okBtn.className = 'btn-primary';
+    okBtn.innerHTML = '<i class="bi bi-check-circle"></i> OK';
+    buttonsEl.appendChild(okBtn);
     
     const okBtn = buttonsEl.querySelector('button');
     okBtn.onclick = () => {
@@ -616,12 +639,49 @@ function showAutosaveIndicator(){
 
 // Helper functions for file handling
 async function handleFiles(files){
+  // Security: Validate file count and total size
+  const MAX_FILES = 20;
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
+  const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total
+  
+  if (screenshots.length + files.length > MAX_FILES) {
+    await showAlert(`Maximum ${MAX_FILES} screenshots allowed`, 'Upload Limit');
+    return;
+  }
+  
+  let totalSize = screenshots.reduce((sum, s) => sum + (s.data?.length || 0), 0);
+  
   for(const f of files){
+    // Security: Strict file type validation
+    if (!f.type.match(/^image\/(png|jpeg|jpg|gif|webp)$/)) {
+      console.warn(`Rejected file: ${f.name} (invalid type: ${f.type})`);
+      continue;
+    }
+    
+    // Security: File size validation
+    if (f.size > MAX_FILE_SIZE) {
+      await showAlert(`File ${f.name} exceeds 5MB limit`, 'File Too Large');
+      continue;
+    }
+    
+    totalSize += f.size;
+    if (totalSize > MAX_TOTAL_SIZE) {
+      await showAlert('Total screenshot size exceeds 10MB limit', 'Upload Limit');
+      return;
+    }
+    
     const data = await readFileAsDataURL(f);
     const id = crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2);
     screenshots.push({id, name: f.name, data});
   }
-  VRBStorage.saveScreenshots(screenshots);
+  
+  try {
+    VRBStorage.saveScreenshots(screenshots);
+  } catch (e) {
+    await showAlert('Failed to save screenshots: ' + e.message, 'Storage Error');
+    return;
+  }
+  
   renderThumbs();
   scheduleAutosave();
 }
@@ -1285,15 +1345,28 @@ function renderTemplatesModal() {
     const card = document.createElement('div');
     card.className = 'template-card';
     
-    card.innerHTML = `
-      <div class="flex items-center gap-2 mb-2">
-        <i class="${template.icon} text-xl" style="color: var(--carbon-blue);"></i>
-        <div class="font-medium">${escapeHtml(template.name)}</div>
-      </div>
-      <div class="text-xs" style="color: var(--text-secondary);">
-        ${escapeHtml(template.data.vuln_title)}
-      </div>
-    `;
+    // Security: Build DOM elements safely
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'flex items-center gap-2 mb-2';
+    
+    const icon = document.createElement('i');
+    icon.className = `${template.icon} text-xl`;
+    icon.style.color = 'var(--carbon-blue)';
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'font-medium';
+    nameDiv.textContent = template.name;
+    
+    headerDiv.appendChild(icon);
+    headerDiv.appendChild(nameDiv);
+    
+    const descDiv = document.createElement('div');
+    descDiv.className = 'text-xs';
+    descDiv.style.color = 'var(--text-secondary)';
+    descDiv.textContent = template.data.vuln_title;
+    
+    card.appendChild(headerDiv);
+    card.appendChild(descDiv);
     
     card.addEventListener('click', async () => {
       const confirmed = await showConfirm(
@@ -1349,7 +1422,19 @@ function renderDraftsModal(drafts){
     div.className = 'draft-item';
     const title = d.data?.vulnerability?.title || 'Untitled';
     const date = new Date(d.updated).toLocaleString();
-    div.innerHTML = `<div class="font-medium">${escapeHtml(d.id)}</div><div class="text-xs text-gray-600">${escapeHtml(title)} – ${date}</div>`;
+    
+    // Security: Use text content instead of innerHTML for user data
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'font-medium';
+    titleDiv.textContent = d.id;
+    
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'text-xs text-gray-600';
+    metaDiv.textContent = `${title} – ${date}`;
+    
+    div.appendChild(titleDiv);
+    div.appendChild(metaDiv);
+    
     div.addEventListener('click', ()=>{
       populateFromModel(d.data);
       draftsModal.classList.add('hidden');

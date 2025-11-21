@@ -10,27 +10,51 @@ const ComponentLoader = {
    * @returns {Promise<string>} - The HTML content
    */
   async load(path, useCache = true) {
+    // Security: Validate path to prevent directory traversal
+    if (!path || typeof path !== 'string') {
+      throw new Error('Invalid path parameter');
+    }
+    
+    // Security: Only allow loading from modules/html directory
+    if (!path.startsWith('modules/html/') || path.includes('..')) {
+      throw new Error('Invalid component path. Only modules/html/ components are allowed.');
+    }
+    
+    // Security: Sanitize path
+    const sanitizedPath = path.replace(/\.\./g, '').replace(/\/\//g, '/');
+    
     // Check cache first
-    if (useCache && this.cache.has(path)) {
-      return this.cache.get(path);
+    if (useCache && this.cache.has(sanitizedPath)) {
+      return this.cache.get(sanitizedPath);
     }
     
     try {
-      const response = await fetch(path);
+      const response = await fetch(sanitizedPath);
       if (!response.ok) {
-        throw new Error(`Failed to load component: ${path} (${response.status})`);
+        throw new Error(`Failed to load component: ${sanitizedPath} (${response.status})`);
+      }
+      
+      // Security: Validate content type
+      const contentType = response.headers.get('content-type');
+      if (contentType && !contentType.includes('text/html') && !contentType.includes('text/plain')) {
+        throw new Error('Invalid content type for component');
       }
       
       const html = await response.text();
       
+      // Security: Validate HTML size (max 100KB per component)
+      if (html.length > 100 * 1024) {
+        throw new Error('Component size exceeds limit');
+      }
+      
       // Cache the result
       if (useCache) {
-        this.cache.set(path, html);
+        this.cache.set(sanitizedPath, html);
       }
       
       return html;
     } catch (error) {
-      console.error(`Error loading component from ${path}:`, error);
+      console.error(`Error loading component from ${sanitizedPath}:`, error);
       throw error;
     }
   },

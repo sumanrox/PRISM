@@ -3,11 +3,15 @@
 const VRBPDF = (function(){
   function buildPrintableHtml(model){
     const s = VRBStorage.loadSettings();
-    const title = model.vulnerability.title || 'Vulnerability Report';
-    const header = s.headerText || '';
-    const footer = s.footerText || '';
-    const headerImg = s.headerImage || '';
-    const footerImg = s.footerImage || '';
+    
+    // Security: Validate and sanitize inputs
+    const title = (model.vulnerability?.title || 'Vulnerability Report').substring(0, 200);
+    const header = (s.headerText || '').substring(0, 500);
+    const footer = (s.footerText || '').substring(0, 500);
+    
+    // Security: Validate image data URLs
+    const headerImg = s.headerImage && s.headerImage.startsWith('data:image/') ? s.headerImage : '';
+    const footerImg = s.footerImage && s.footerImage.startsWith('data:image/') ? s.footerImage : '';
 
     // render markdown to sanitized HTML
     let md = `# ${escapeMarkdown(title)}\n\n`;
@@ -17,7 +21,7 @@ const VRBPDF = (function(){
     md += `---\n\n## Steps to Reproduce\n\n${model.vulnerability.steps}\n\n`;
     md += `---\n\n## Observables / Evidence\n\n`;
     if(model.vulnerability.observables && model.vulnerability.observables.length){
-      md += model.vulnerability.observables.map(o=>`- ${o}`).join('\n') + '\n\n';
+      md += model.vulnerability.observables.map(o=>`- ${escapeMarkdown(o)}`).join('\n') + '\n\n';
     }
     md += `---\n\n## Impact\n\n${model.vulnerability.impact}\n\n`;
     if(model.vulnerability.mitigation){
@@ -29,7 +33,10 @@ const VRBPDF = (function(){
     if(model.screenshots && model.screenshots.length){
       md += `---\n\n## Evidence (Screenshots)\n\n`;
       model.screenshots.forEach(snap=>{
-        md += `### ${escapeMarkdown(snap.name)}\n\n![${escapeMarkdown(snap.name)}](${snap.data})\n\n`;
+        // Security: Validate screenshot data
+        if (snap.data && snap.data.startsWith('data:image/')) {
+          md += `### ${escapeMarkdown(snap.name)}\n\n![${escapeMarkdown(snap.name)}](${snap.data})\n\n`;
+        }
       });
     }
 
@@ -42,7 +49,12 @@ const VRBPDF = (function(){
       if(r.disclosure) md += `- **Disclosure Preference:** ${escapeMarkdown(r.disclosure)}\n`;
     }
 
-    const content = DOMPurify.sanitize(marked.parse(md));
+    // Security: Use DOMPurify with strict configuration
+    const content = DOMPurify.sanitize(marked.parse(md), {
+      ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'br', 'hr', 'strong', 'em', 'ul', 'ol', 'li', 'code', 'pre', 'img', 'blockquote'],
+      ALLOWED_ATTR: ['src', 'alt', 'title'],
+      ALLOW_DATA_ATTR: false
+    });
 
     const html = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>
       body{font-family:'Segoe UI',Arial,Helvetica,sans-serif;padding:20px;color:#1a1a1a;line-height:1.6;max-width:800px;margin:0 auto}
@@ -85,6 +97,10 @@ const VRBPDF = (function(){
   function previewPrintable(model){
     const html = buildPrintableHtml(model);
     const w = window.open('', '_blank');
+    if (!w) {
+      alert('Pop-up blocked. Please allow pop-ups for this site to preview PDF.');
+      return;
+    }
     w.document.write(html);
     w.document.close();
   }
@@ -97,12 +113,18 @@ const VRBPDF = (function(){
     container.innerHTML = html;
     document.body.appendChild(container);
 
-    const pageSize = VRBStorage.loadSettings().pageSize || 'a4';
+    const settings = VRBStorage.loadSettings();
+    const pageSize = settings.pageSize === 'letter' ? 'letter' : 'a4'; // Security: Validate page size
+    
+    // Security: Sanitize filename
+    const rawFilename = model.vulnerability?.title || 'vulnerability-report';
+    const safeFilename = rawFilename.replace(/[^a-z0-9\-_]/gi, '-').toLowerCase().substring(0, 100) + '.pdf';
+    
     const opt = {
       margin:       [10, 10, 10, 10],
-      filename:     (model.vulnerability.title||'vulnerability-report').replace(/[^a-z0-9]/gi, '-').toLowerCase() + '.pdf',
+      filename:     safeFilename,
       image:        { type: 'jpeg', quality: 0.95 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      html2canvas:  { scale: 2, useCORS: true, logging: false, allowTaint: false },
       jsPDF:        { unit: 'mm', format: pageSize, orientation: 'portrait' }
     };
 

@@ -7,17 +7,59 @@ const STORAGE_KEYS = {
 };
 
 const Storage = {
+  // Security: Maximum storage size limits (in bytes)
+  MAX_SIZES: {
+    REPORTER: 10 * 1024,      // 10KB
+    DRAFT: 500 * 1024,        // 500KB per draft
+    SCREENSHOTS: 5 * 1024 * 1024,  // 5MB total
+    SETTINGS: 50 * 1024       // 50KB
+  },
+  
+  _validateSize(key, data) {
+    const jsonStr = JSON.stringify(data);
+    const size = new Blob([jsonStr]).size;
+    const maxSize = this.MAX_SIZES[key.toUpperCase().replace('VRB_', '')];
+    
+    if (maxSize && size > maxSize) {
+      throw new Error(`Data exceeds maximum size limit for ${key}`);
+    }
+    return jsonStr;
+  },
+  
   saveReporter(reporter){
-    localStorage.setItem(STORAGE_KEYS.REPORTER, JSON.stringify(reporter));
+    try {
+      const jsonStr = this._validateSize(STORAGE_KEYS.REPORTER, reporter);
+      localStorage.setItem(STORAGE_KEYS.REPORTER, jsonStr);
+    } catch (e) {
+      console.error('Failed to save reporter:', e.message);
+      throw e;
+    }
   },
   loadReporter(){
-    const v = localStorage.getItem(STORAGE_KEYS.REPORTER);
-    return v ? JSON.parse(v) : null;
+    try {
+      const v = localStorage.getItem(STORAGE_KEYS.REPORTER);
+      return v ? JSON.parse(v) : null;
+    } catch (e) {
+      console.error('Failed to load reporter data:', e);
+      return null;
+    }
   },
   saveDraft(id, report){
-    const all = Storage._loadAllDrafts();
-    all[id] = { id, data: report, updated: Date.now() };
-    localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(all));
+    try {
+      const all = Storage._loadAllDrafts();
+      all[id] = { id, data: report, updated: Date.now() };
+      
+      // Security: Validate draft size
+      const draftSize = new Blob([JSON.stringify(all[id])]).size;
+      if (draftSize > this.MAX_SIZES.DRAFT) {
+        throw new Error(`Draft exceeds maximum size limit of ${this.MAX_SIZES.DRAFT / 1024}KB`);
+      }
+      
+      localStorage.setItem(STORAGE_KEYS.DRAFTS, JSON.stringify(all));
+    } catch (e) {
+      console.error('Failed to save draft:', e.message);
+      throw e;
+    }
   },
   loadDraft(id){
     const all = Storage._loadAllDrafts();
@@ -28,16 +70,57 @@ const Storage = {
     return Object.values(all).sort((a,b)=>b.updated-a.updated);
   },
   _loadAllDrafts(){
-    const v = localStorage.getItem(STORAGE_KEYS.DRAFTS);
-    return v ? JSON.parse(v) : {};
+    try {
+      const v = localStorage.getItem(STORAGE_KEYS.DRAFTS);
+      if (!v) return {};
+      
+      // Security: Parse JSON safely and filter out prototype pollution attempts
+      const parsed = JSON.parse(v);
+      if (typeof parsed !== 'object' || parsed === null) return {};
+      
+      // Security: Remove dangerous keys
+      const dangerous = ['__proto__', 'constructor', 'prototype'];
+      for (const key of dangerous) {
+        delete parsed[key];
+      }
+      
+      return parsed;
+    } catch (e) {
+      console.error('Failed to load drafts:', e);
+      return {};
+    }
   },
   saveScreenshots(arr){
-    // arr = [{id,name,data}]
-    localStorage.setItem(STORAGE_KEYS.SCREENSHOTS, JSON.stringify(arr));
+    try {
+      // Security: Validate total screenshot size
+      const jsonStr = this._validateSize(STORAGE_KEYS.SCREENSHOTS, arr);
+      localStorage.setItem(STORAGE_KEYS.SCREENSHOTS, jsonStr);
+    } catch (e) {
+      console.error('Failed to save screenshots:', e.message);
+      throw e;
+    }
   },
   loadScreenshots(){
-    const v = localStorage.getItem(STORAGE_KEYS.SCREENSHOTS);
-    return v ? JSON.parse(v) : [];
+    try {
+      const v = localStorage.getItem(STORAGE_KEYS.SCREENSHOTS);
+      if (!v) return [];
+      
+      const parsed = JSON.parse(v);
+      if (!Array.isArray(parsed)) return [];
+      
+      // Security: Validate screenshot structure
+      return parsed.filter(item => {
+        return item && 
+               typeof item === 'object' && 
+               typeof item.id === 'string' && 
+               typeof item.name === 'string' && 
+               typeof item.data === 'string' &&
+               item.data.startsWith('data:image/');
+      });
+    } catch (e) {
+      console.error('Failed to load screenshots:', e);
+      return [];
+    }
   },
   clearAll(){
     localStorage.removeItem(STORAGE_KEYS.REPORTER);
@@ -46,11 +129,49 @@ const Storage = {
     localStorage.removeItem(STORAGE_KEYS.SETTINGS);
   },
   saveSettings(s){
-    localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(s));
+    try {
+      const jsonStr = this._validateSize(STORAGE_KEYS.SETTINGS, s);
+      localStorage.setItem(STORAGE_KEYS.SETTINGS, jsonStr);
+    } catch (e) {
+      console.error('Failed to save settings:', e.message);
+      throw e;
+    }
   },
   loadSettings(){
-    const v = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-    return v ? JSON.parse(v) : { pageSize: 'a4', headerText:'', footerText:'', headerImage:'', footerImage:'', includeReporter:true, pdfFont:'Inter' };
+    try {
+      const v = localStorage.getItem(STORAGE_KEYS.SETTINGS);
+      if (!v) {
+        return { 
+          pageSize: 'a4', 
+          headerText:'', 
+          footerText:'', 
+          headerImage:'', 
+          footerImage:'', 
+          includeReporter:true, 
+          pdfFont:'Inter' 
+        };
+      }
+      
+      const parsed = JSON.parse(v);
+      if (typeof parsed !== 'object' || parsed === null) {
+        return { pageSize: 'a4', headerText:'', footerText:'', headerImage:'', footerImage:'', includeReporter:true, pdfFont:'Inter' };
+      }
+      
+      // Security: Validate and sanitize settings
+      const allowed = ['pageSize', 'headerText', 'footerText', 'headerImage', 'footerImage', 'includeReporter', 'pdfFont'];
+      const safe = { pageSize: 'a4', headerText:'', footerText:'', headerImage:'', footerImage:'', includeReporter:true, pdfFont:'Inter' };
+      
+      for (const key of allowed) {
+        if (key in parsed) {
+          safe[key] = parsed[key];
+        }
+      }
+      
+      return safe;
+    } catch (e) {
+      console.error('Failed to load settings:', e);
+      return { pageSize: 'a4', headerText:'', footerText:'', headerImage:'', footerImage:'', includeReporter:true, pdfFont:'Inter' };
+    }
   }
 };
 
